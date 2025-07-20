@@ -878,97 +878,474 @@ useEffect(() => {
 
 ---
 
-## ⚠️ Error Handling in React
-- Handle errors in API calls, user input, and rendering.
-- Use `try/catch` in async functions and show user-friendly messages.
+## 🚦 React Router: Routing in React Apps
+
+### 🗺️ What is React Router?
+- <span style="color:#007acc">**React Router**</span> is a popular library for handling navigation and routing in React applications. It allows you to display different components based on the URL, create navigation menus, and manage browser history.
+- <span style="color:#228B22">React Router v6 is the latest major version (as of 2024).</span>
+
+---
+
+### 🛣️ Defining Routes
+- <span style="color:#228B22">Routes determine which component is rendered for a given URL path.</span>
+- <span style="color:#228B22">You use the <code>&lt;Routes&gt;</code> and <code>&lt;Route&gt;</code> components from <code>react-router-dom</code>.</span>
 
 **Example:**
 ```jsx
-function UserList() {
-  const [users, setUsers] = useState([]);
-  const [error, setError] = useState(null);
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './Home';
+import About from './About';
+import Contact from './Contact';
 
-  useEffect(() => {
-    fetch('/api/users')
-      .then(res => {
-        if (!res.ok) throw new Error('Network error');
-        return res.json();
-      })
-      .then(data => setUsers(data))
-      .catch(err => setError(err.message));
-  }, []);
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+- <span style="color:#228B22">The <code>path</code> prop sets the URL, and <code>element</code> is the component to render.</span>
 
-  if (error) return <div>Error: {error}</div>;
-  return <div>{users.map(u => <div key={u.id}>{u.name}</div>)}</div>;
+---
+
+### 🔗 Navigation with Link
+- <span style="color:#228B22">Use the <code>&lt;Link&gt;</code> component to navigate between routes without reloading the page (SPA behavior).</span>
+
+**Example:**
+```jsx
+import { Link } from 'react-router-dom';
+
+function Navbar() {
+  return (
+    <nav>
+      <Link to="/">Home</Link>
+      <Link to="/about">About</Link>
+      <Link to="/contact">Contact</Link>
+    </nav>
+  );
+}
+```
+- <span style="color:#228B22">The <code>to</code> prop sets the destination path. Clicking a <code>Link</code> updates the URL and renders the corresponding component.</span>
+
+---
+
+### 🧭 navLink: Active Navigation Styling
+- <span style="color:#228B22">Use <code>&lt;NavLink&gt;</code> for navigation links that need to show an "active" style when the link matches the current URL.</span>
+
+**Example:**
+```jsx
+import { NavLink } from 'react-router-dom';
+
+function Navbar() {
+  return (
+    <nav>
+      <NavLink to="/" style={({ isActive }) => ({ fontWeight: isActive ? 'bold' : 'normal' })}>
+        Home
+      </NavLink>
+      <NavLink to="/about" className={({ isActive }) => isActive ? 'active-link' : undefined}>
+        About
+      </NavLink>
+      <NavLink to="/contact">
+        Contact
+      </NavLink>
+    </nav>
+  );
+}
+```
+- <span style="color:#228B22">You can use the <code>style</code> or <code>className</code> prop to apply styles when the link is active.</span>
+- <span style="color:#228B22">The <code>isActive</code> argument tells you if the link matches the current route.</span>
+
+---
+
+### 🧑‍💻 Full Example: Simple React Router App
+
+```jsx
+// App.js
+import { BrowserRouter, Routes, Route, Link, NavLink } from 'react-router-dom';
+
+function Home() {
+  return <h2>Home Page</h2>;
+}
+function About() {
+  return <h2>About Page</h2>;
+}
+function Contact() {
+  return <h2>Contact Page</h2>;
+}
+
+function Navbar() {
+  return (
+    <nav>
+      <NavLink to="/" end style={({ isActive }) => ({ color: isActive ? 'red' : 'black' })}>
+        Home
+      </NavLink>
+      {' | '}
+      <NavLink to="/about" style={({ isActive }) => ({ color: isActive ? 'red' : 'black' })}>
+        About
+      </NavLink>
+      {' | '}
+      <NavLink to="/contact" style={({ isActive }) => ({ color: isActive ? 'red' : 'black' })}>
+        Contact
+      </NavLink>
+    </nav>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 ```
 
 ---
 
-## ⏳ Loading State
-- Show a loading indicator while waiting for data.
-- Use a `loading` state variable.
+### 🧭 useNavigate: Programmatic Navigation in React Router
+
+- <span style="color:#007acc">**useNavigate**</span> is a React Router hook that lets you navigate to different routes in your app using JavaScript code (not just by clicking links).
+- <span style="color:#228B22">This is useful for redirecting after a form submission, button click, or as a result of some logic.</span>
+
+#### 📌 Basic Usage
+```jsx
+import { useNavigate } from 'react-router-dom';
+
+function MyComponent() {
+  const navigate = useNavigate();
+
+  function handleClick() {
+    navigate('/about'); // Go to the /about page
+  }
+
+  return <button onClick={handleClick}>Go to About</button>;
+}
+```
+- <span style="color:#228B22">Calling <code>navigate('/about')</code> changes the URL and renders the corresponding route.</span>
+
+#### 📌 Navigating with Options
+- <span style="color:#228B22">You can pass options to <code>navigate</code>:</span>
+  - <code>replace: true</code> replaces the current entry in the history stack (like a redirect).
+  - <code>navigate(-1)</code> goes back one page (like browser back button).
 
 **Example:**
 ```jsx
-function Posts() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+navigate('/login', { replace: true }); // Redirect to /login, replacing current page
+navigate(-1); // Go back
+```
 
-  useEffect(() => {
-    fetch('/api/posts')
-      .then(res => res.json())
-      .then(data => {
-        setPosts(data);
-        setLoading(false);
-      });
-  }, []);
+#### 📌 Example: Redirect After Form Submit
+```jsx
+import { useNavigate } from 'react-router-dom';
 
-  if (loading) return <div>Loading...</div>;
-  return <div>{posts.map(p => <div key={p.id}>{p.title}</div>)}</div>;
+function LoginForm() {
+  const navigate = useNavigate();
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    // ... authentication logic ...
+    navigate('/dashboard'); // Redirect to dashboard after login
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type="text" placeholder="Username" />
+      <button type="submit">Login</button>
+    </form>
+  );
 }
 ```
 
 ---
 
-## 🛠️ Custom Hooks
-- Custom hooks let you extract and reuse logic across components.
-- They start with `use` and can use other hooks inside.
+### 🏷️ Route Parameters (Params) in React Router
+
+- <span style="color:#007acc">**Route parameters**</span> (params) let you capture dynamic values from the URL and use them in your components. They are useful for things like user profiles, product pages, etc.
+
+#### 📌 Defining Route Parameters
+- <span style="color:#228B22">Use a colon (<code>:</code>) in the <code>path</code> to define a param.</span>
 
 **Example:**
 ```jsx
-function useFetch(url) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+<Routes>
+  <Route path="/users/:userId" element={<UserProfile />} />
+</Routes>
+```
+- <span style="color:#228B22">Here, <code>:userId</code> is a route parameter. URLs like <code>/users/42</code> or <code>/users/alice</code> will match.</span>
 
-  useEffect(() => {
-    fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error('Error fetching');
-        return res.json();
-      })
-      .then(data => {
-        setData(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [url]);
+#### 📌 Accessing Params with useParams
+- <span style="color:#228B22">Use the <code>useParams</code> hook from <code>react-router-dom</code> to access params inside your component.</span>
 
-  return { data, loading, error };
-}
+**Example:**
+```jsx
+import { useParams } from 'react-router-dom';
 
-// Usage
-function Users() {
-  const { data: users, loading, error } = useFetch('/api/users');
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  return <div>{users.map(u => <div key={u.id}>{u.name}</div>)}</div>;
+function UserProfile() {
+  const { userId } = useParams();
+  return <h2>User ID: {userId}</h2>;
 }
 ```
+- <span style="color:#228B22">The <code>useParams</code> hook returns an object with all route params as strings.</span>
+
+#### 📌 Multiple Params
+```jsx
+<Route path="/posts/:postId/comments/:commentId" element={<Comment />} />
+
+// In Comment component:
+const { postId, commentId } = useParams();
+```
+
+#### 📌 Optional Params
+- <span style="color:#228B22">Add a <code>?</code> to make a param optional (React Router v6+):</span>
+```jsx
+<Route path="/users/:userId?" element={<UserProfile />} />
+```
+
+---
+
+### 🔍 URL Search Params (Query Strings)
+- <span style="color:#228B22">For query strings like <code>?sort=asc&page=2</code>, use the <code>useSearchParams</code> hook.</span>
+
+**Example:**
+```jsx
+import { useSearchParams } from 'react-router-dom';
+
+function Products() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sort = searchParams.get('sort');
+  const page = searchParams.get('page');
+
+  return <div>Sort: {sort}, Page: {page}</div>;
+}
+```
+- <span style="color:#228B22">You can also update search params with <code>setSearchParams</code>.</span>
+
+---
+
+### 🧑‍💻 Full Example: Params and Search Params
+```jsx
+import { BrowserRouter, Routes, Route, useParams, useSearchParams } from 'react-router-dom';
+
+function UserProfile() {
+  const { userId } = useParams();
+  return <h2>User ID: {userId}</h2>;
+}
+
+function Products() {
+  const [searchParams] = useSearchParams();
+  const sort = searchParams.get('sort') || 'none';
+  return <h2>Sort order: {sort}</h2>;
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/users/:userId" element={<UserProfile />} />
+        <Route path="/products" element={<Products />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+---
+
+### 📚 More Resources
+- [React Router: useParams](https://reactrouter.com/en/main/hooks/use-params)
+- [React Router: useSearchParams](https://reactrouter.com/en/main/hooks/use-search-params)
+
+---
+
+### ⚠️ Notes and Best Practices
+- <span style="color:#228B22">Always wrap your app in <code>&lt;BrowserRouter&gt;</code> (or <code>HashRouter</code> for static hosting).</span>
+- <span style="color:#228B22">Use <code>&lt;Routes&gt;</code> and <code>&lt;Route&gt;</code> for route definitions (v6+).</span>
+- <span style="color:#228B22">Use <code>&lt;Link&gt;</code> or <code>&lt;NavLink&gt;</code> for navigation instead of <code>&lt;a&gt;</code> tags to avoid full page reloads.</span>
+- <span style="color:#228B22">The <code>end</code> prop on <code>NavLink</code> ensures exact matching for the root path.</span>
+
+---
+
+### 📚 More Resources
+- [React Router Docs](https://reactrouter.com/en/main)
+- [React Router Tutorial](https://reactrouter.com/en/main/start/tutorial)
+- [MDN: Client-side routing](https://developer.mozilla.org/en-US/docs/Glossary/Client-side_routing)
+
+---
+
+### 🚫 No Route Found (404 Not Found) in React Router
+
+- <span style="color:#007acc">**Handling unknown routes**</span> is important for user experience. In React Router, you can show a custom 404 page when no route matches the current URL.
+
+#### 📌 Basic 404 Route (React Router v6+)
+- <span style="color:#228B22">Use a <code>path="*"</code> route as the last <code>&lt;Route&gt;</code> to catch all unmatched URLs.</span>
+
+**Example:**
+```jsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+function NotFound() {
+  return <h2>404 - Page Not Found</h2>;
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+- <span style="color:#228B22">The <code>path="*"</code> route will match any URL that doesn't match a previous route, displaying the <code>NotFound</code> component.</span>
+
+#### 📌 Customizing the 404 Page
+- <span style="color:#228B22">You can add navigation links, images, or custom styles to your 404 page.</span>
+
+**Example:**
+```jsx
+function NotFound() {
+  return (
+    <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+      <h1>404</h1>
+      <p>Sorry, the page you are looking for does not exist.</p>
+      <Link to="/">Go Home</Link>
+    </div>
+  );
+}
+```
+
+---
+
+### 📚 More Resources
+- [React Router: Route Matching](https://reactrouter.com/en/main/route/matching)
+- [React Router: 404 Not Found Example](https://reactrouter.com/en/main/start/tutorial#handling-not-found-errors)
+
+---
+
+### 🗂️ Nested Routes in React Router
+
+- <span style="color:#007acc">**Nested routes**</span> let you render child components inside parent components based on the URL structure. This is useful for layouts, dashboards, and sections with sub-pages.
+
+#### 📌 Defining Nested Routes
+- <span style="color:#228B22">Use a parent <code>&lt;Route&gt;</code> with child <code>&lt;Route&gt;</code>s inside. The parent component should render an <code>&lt;Outlet /&gt;</code> where child routes will appear.</span>
+
+**Example:**
+```jsx
+import { BrowserRouter, Routes, Route, Outlet, Link } from 'react-router-dom';
+
+function Dashboard() {
+  return (
+    <div>
+      <h2>Dashboard</h2>
+      <nav>
+        <Link to="profile">Profile</Link> | <Link to="settings">Settings</Link>
+      </nav>
+      <Outlet /> {/* Child routes render here */}
+    </div>
+  );
+}
+
+function Profile() {
+  return <h3>Profile Page</h3>;
+}
+function Settings() {
+  return <h3>Settings Page</h3>;
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />}>
+          <Route index element={<DashboardHome />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+- <span style="color:#228B22">Visiting <code>/dashboard/profile</code> or <code>/dashboard/settings</code> will render the corresponding child component inside <code>Dashboard</code>.</span>
+
+#### 📌 Index Routes
+- <span style="color:#228B22">Use <code>index</code> to render a default child route when the parent path is matched exactly.</span>
+
+**Example:**
+```jsx
+<Route path="/dashboard" element={<Dashboard />}>
+  <Route index element={<DashboardHome />} />
+  <Route path="profile" element={<Profile />} />
+</Route>
+```
+- <span style="color:#228B22">Now <code>/dashboard</code> shows <code>DashboardHome</code> by default.</span>
+
+#### 📌 Nested Navigation
+- <span style="color:#228B22">Use relative paths in <code>Link</code> (e.g., <code>to="profile"</code>) for child routes.</span>
+
+---
+
+### 🧑‍💻 Full Example: Nested Routes
+```jsx
+import { BrowserRouter, Routes, Route, Outlet, Link } from 'react-router-dom';
+
+function Dashboard() {
+  return (
+    <div>
+      <h2>Dashboard</h2>
+      <nav>
+        <Link to="profile">Profile</Link> | <Link to="settings">Settings</Link>
+      </nav>
+      <Outlet />
+    </div>
+  );
+}
+
+function DashboardHome() {
+  return <h3>Welcome to your dashboard!</h3>;
+}
+function Profile() {
+  return <h3>Profile Page</h3>;
+}
+function Settings() {
+  return <h3>Settings Page</h3>;
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />}>
+          <Route index element={<DashboardHome />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+        <Route path="/" element={<h2>Home</h2>} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+---
+
+### 📚 More Resources
+- [React Router: Nested Routes](https://reactrouter.com/en/main/route/nesting)
+- [React Router: Outlet](https://reactrouter.com/en/main/components/outlet)
 
 ---
 
@@ -1042,3 +1419,247 @@ function Form() {
 - React events are camelCase and easy to use.
 
 > _Master these patterns for robust, maintainable React apps!_ 🏆
+
+---
+
+### 📍 useLocation: Accessing the Current Location in React Router
+
+- <span style="color:#007acc">**useLocation**</span> is a React Router hook that lets you access information about the current URL/location in your app.
+- <span style="color:#228B22">This is useful for reading the current path, search params, hash, or state passed during navigation.</span>
+
+#### 📌 Basic Usage
+```jsx
+import { useLocation } from 'react-router-dom';
+
+function ShowLocation() {
+  const location = useLocation();
+  return (
+    <div>
+      <p>Current pathname: {location.pathname}</p>
+      <p>Search string: {location.search}</p>
+      <p>Hash: {location.hash}</p>
+      <p>State: {JSON.stringify(location.state)}</p>
+    </div>
+  );
+}
+```
+- <span style="color:#228B22">The <code>location</code> object contains:</span>
+  - <code>pathname</code>: The current path (e.g., <code>"/about"</code>)
+  - <code>search</code>: The query string (e.g., <code>"?sort=asc"</code>)
+  - <code>hash</code>: The hash fragment (e.g., <code>"#section1"</code>)
+  - <code>state</code>: Any state passed with navigation
+  - <code>key</code>: Unique location key
+
+#### 📌 Example: Using useLocation to Highlight Active Section
+```jsx
+import { useLocation } from 'react-router-dom';
+
+function SectionNav() {
+  const location = useLocation();
+  return (
+    <nav>
+      <a href="#section1" style={{ fontWeight: location.hash === '#section1' ? 'bold' : 'normal' }}>Section 1</a>
+      <a href="#section2" style={{ fontWeight: location.hash === '#section2' ? 'bold' : 'normal' }}>Section 2</a>
+    </nav>
+  );
+}
+```
+
+#### 📌 Example: Reading State Passed with Navigation
+```jsx
+import { useLocation, useNavigate } from 'react-router-dom';
+
+function Sender() {
+  const navigate = useNavigate();
+  return <button onClick={() => navigate('/target', { state: { from: 'Sender' } })}>Go</button>;
+}
+
+function Target() {
+  const location = useLocation();
+  return <div>Arrived from: {location.state?.from}</div>;
+}
+```
+
+---
+
+### 📚 More Resources
+- [React Router: useLocation](https://reactrouter.com/en/main/hooks/use-location)
+
+---
+
+## 📁 Restructuring and Re-exporting with index.js
+
+### 🗂️ Why Use an index.js File?
+- <span style="color:#007acc">**index.js**</span> files are commonly used in folders to centralize and simplify imports/exports.
+- <span style="color:#228B22">They allow you to re-export multiple modules from a single entry point, making imports cleaner and more maintainable.</span>
+
+---
+
+### 📦 Example: Exporting from index.js
+
+Suppose you have a folder structure like this:
+```
+/components
+  |-- Button.js
+  |-- Card.js
+  |-- Navbar.js
+  |-- index.js
+```
+
+**Button.js**
+```js
+export default function Button() { /* ... */ }
+```
+**Card.js**
+```js
+export default function Card() { /* ... */ }
+```
+**Navbar.js**
+```js
+export default function Navbar() { /* ... */ }
+```
+
+**index.js** (re-exporting all components)
+```js
+export { default as Button } from './Button';
+export { default as Card } from './Card';
+export { default as Navbar } from './Navbar';
+```
+
+---
+
+### 📥 Importing from the Folder
+- <span style="color:#228B22">Now you can import all components from the folder, not individual files:</span>
+
+```js
+import { Button, Card, Navbar } from './components';
+```
+- <span style="color:#228B22">This is much cleaner, especially as your project grows.</span>
+
+---
+
+### 🧩 Re-exporting Named Exports
+- <span style="color:#228B22">You can also re-export named exports from multiple files:</span>
+
+**utils/math.js**
+```js
+export function add(a, b) { return a + b; }
+export function subtract(a, b) { return a - b; }
+```
+**utils/string.js**
+```js
+export function capitalize(str) { /* ... */ }
+export function toLower(str) { /* ... */ }
+```
+**utils/index.js**
+```js
+export * from './math';
+export * from './string';
+```
+
+Now you can do:
+```js
+import { add, subtract, capitalize } from './utils';
+```
+
+---
+
+### ⚠️ Notes and Best Practices
+- <span style="color:#228B22">index.js is automatically resolved by import statements targeting the folder.</span>
+- <span style="color:#228B22">You can use <code>index.ts</code> for TypeScript projects.</span>
+- <span style="color:#228B22">This pattern is great for organizing components, hooks, utilities, and contexts.</span>
+- <span style="color:#228B22">Avoid circular dependencies when re-exporting from multiple files.</span>
+
+---
+
+### 📚 More Resources
+- [MDN: import - Re-exporting](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#re-exporting)
+- [MDN: export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export)
+
+---
+
+## 🗂️ Centralized Routes Folder Setup in React
+
+### 📁 Why Use a Routes Folder?
+- <span style="color:#007acc">**Centralizing your routes**</span> in a dedicated folder makes your app easier to maintain, scale, and organize, especially for larger projects.
+- <span style="color:#228B22">You can define all your route components and route definitions in one place, then import them into your main <code>App.js</code> or <code>main.jsx</code>.</span>
+
+---
+
+### 📦 Example Folder Structure
+```
+/src
+  /components
+  /pages
+  /routes
+    |-- AppRoutes.js
+    |-- index.js
+  App.js
+```
+
+---
+
+### 📝 Defining Routes in a Central File
+
+**routes/AppRoutes.js**
+```jsx
+import { Routes, Route } from 'react-router-dom';
+import Home from '../pages/Home';
+import About from '../pages/About';
+import Dashboard from '../pages/Dashboard';
+import NotFound from '../pages/NotFound';
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/dashboard/*" element={<Dashboard />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+export default AppRoutes;
+```
+
+---
+
+### 📥 Re-exporting from index.js
+
+**routes/index.js**
+```js
+export { default as AppRoutes } from './AppRoutes';
+```
+
+---
+
+### 🧩 Using Centralized Routes in App.js
+
+**App.js**
+```jsx
+import { BrowserRouter } from 'react-router-dom';
+import { AppRoutes } from './routes';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
+}
+
+export default App;
+```
+
+---
+
+### ⚡ Benefits
+- <span style="color:#228B22">Keeps your main <code>App.js</code> clean and focused.</span>
+- <span style="color:#228B22">Makes it easy to add, remove, or update routes in one place.</span>
+- <span style="color:#228B22">Encourages separation of concerns and better project structure.</span>
+
+---
+
+### 📚 More Resources
+- [React Router: Organizing Routes](https://reactrouter.com/en/main/start/tutorial#organizing-routes)
